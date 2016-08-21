@@ -3,9 +3,13 @@ package app.appsmatic.com.driversapp;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,15 +42,41 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+            builder.setMessage("Application could not be started because GPS not Enabled")
+                    .setCancelable(false)
+                    .setPositiveButton("Turn on Gps", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    }).setIcon(android.R.drawable.alert_light_frame);
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+
+
+
+
+
+
+
+
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-       // window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        // window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
 
-        user=(EditText)findViewById(R.id.user);
-        pass=(EditText)findViewById(R.id.pass);
-        logbtn=(ImageView)findViewById(R.id.lognbutton);
-
+        user = (EditText) findViewById(R.id.user);
+        pass = (EditText) findViewById(R.id.pass);
+        logbtn = (ImageView) findViewById(R.id.lognbutton);
 
 
         logbtn.setOnClickListener(new View.OnClickListener() {
@@ -71,13 +101,13 @@ public class LoginActivity extends AppCompatActivity {
                         if (mProgressDialog.isShowing())
                             mProgressDialog.dismiss();
 
-                        msg=response.body().getMessage();
-                        if(msg==null){
+                        msg = response.body().getMessage();
+                        if (msg == null) {
 
                             LoginActivity.this.finish();
                             startActivity(new Intent(getApplicationContext(), HomeActivty.class).putExtra("DriverID", response.body().getDriverid()));
 
-                        }else{
+                        } else {
 
 
                             new AlertDialog.Builder(LoginActivity.this)
@@ -91,8 +121,6 @@ public class LoginActivity extends AppCompatActivity {
                                     }).setIcon(android.R.drawable.ic_dialog_alert).show();
 
 
-
-
                         }
 
 
@@ -100,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<DriverID> call, Throwable t) {
-
 
 
                         if (mProgressDialog.isShowing())
@@ -132,4 +159,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
+
+
 }
